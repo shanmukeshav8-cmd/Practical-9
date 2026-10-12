@@ -1,0 +1,59 @@
+import heapq
+
+def prim_mst(graph, start):
+    visited = set()       # Keeps track of cities we have connected
+    mst_edges = []        # Stores the chosen roads
+    total_cost = 0        # Total cost of the roads
+    
+    # The heap helps us quickly find the cheapest road.
+    # It stores: (cost, from_city, to_city)
+    roads_queue = []
+    
+    # 1. Start at the first city
+    visited.add(start)
+    
+    # 2. Look at all roads leaving the start city and add them to our queue
+    for neighbor, cost in graph[start]:
+        heapq.heappush(roads_queue, (cost, start, neighbor))
+        
+    # 3. Keep picking the cheapest road until everyone is connected
+    while roads_queue:
+        cost, city_a, city_b = heapq.heappop(roads_queue)
+        
+        # If the destination city is already connected, skip it to avoid loops
+        if city_b in visited:
+            continue
+            
+        # Connect the new city
+        visited.add(city_b)
+        mst_edges.append((city_a, city_b, cost))
+        total_cost += cost
+        
+        # Look at all roads leaving this new city and add them to the queue
+        for neighbor, next_cost in graph[city_b]:
+            if neighbor not in visited:
+                heapq.heappush(roads_queue, (next_cost, city_b, neighbor))
+                
+    return mst_edges, total_cost
+
+
+# --- Example Map ---
+# A map of cities and the cost to connect them
+my_graph = {
+    'A': [('B', 2), ('C', 3)],
+    'B': [('A', 2), ('C', 1), ('D', 4)],
+    'C': [('A', 3), ('B', 1), ('D', 5)],
+    'D': [('B', 4), ('C', 5)]
+}
+
+# Run the algorithm starting at city 'A'
+edges, total = prim_mst(my_graph, 'A')
+
+print("Chosen roads:", edges)
+print("Total minimum cost:", total)
+
+
+OUTPUT :
+
+Chosen roads: [('A', 'B', 2), ('B', 'C', 1), ('B', 'D', 4)]
+Total minimum cost: 7
